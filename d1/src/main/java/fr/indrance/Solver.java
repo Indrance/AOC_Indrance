@@ -13,6 +13,9 @@ public class Solver {
         int lastNumber = -1;
         String finalLine = "";
 
+        // Part 1 or 2
+        Boolean withLetter = true;
+
         // Boilerplate file reader
         String file = getClass().getClassLoader().getResource("d1.txt").getFile();
         System.out.println(file);
@@ -20,7 +23,7 @@ public class Solver {
         // MAIN LOOP
         String currentLine = reader.readLine();
         while (currentLine != null) {
-            System.out.println("current line : " +currentLine);
+            //System.out.println("current line : " +currentLine);
             // Remplacing every number string by a number
             /*currentLine = currentLine.toLowerCase();
             currentLine = currentLine.replace("one","1");
@@ -36,8 +39,9 @@ public class Solver {
             // and that didn't work thanks to oneight... thx
 
             // SCANNING FOR EACH NUMBER, very ugly solution, but on paper should work
+
             for (int i = 0; i < currentLine.length(); i++) {
-                if (Character.isLetter(currentLine.charAt(i))) {
+                if (Character.isLetter(currentLine.charAt(i)) && withLetter) {
                     switch (currentLine.charAt(i)) {
                         case 'o':
                             try {
@@ -135,14 +139,14 @@ public class Solver {
                     }
                     lastNumber = Character.getNumericValue(finalLine.charAt(i));
                 }
-            }System.out.println("all number in string : " + finalLine);
-            System.out.println("first number : " +firstNumber + " last number : " + lastNumber);
+            }
+            //System.out.println("all number in string : " + finalLine);
+            //System.out.println("first number : " +firstNumber + " last number : " + lastNumber);
             finalNumber += Integer.parseInt(firstNumber + "" + lastNumber);
             firstNumber = -1;
             lastNumber = -1;
             finalLine = "";
-            System.out.println( "result for now : " + finalNumber);
-            System.out.println("--------------------");
+            System.out.println(finalNumber);
             currentLine = reader.readLine();
         }
         reader.close();
