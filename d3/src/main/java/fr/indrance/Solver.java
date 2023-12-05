@@ -33,11 +33,54 @@ public class Solver {
         }
         System.out.println("----------------");
         reader.close();
-        matriceReader(matrice);
+        matriceReader(matriceSolver(matrice));
+
+
+    }
+
+    public String[][] matriceSolver(String[][] matrice){
+        Boolean notCheckedEverything = true;
+        Boolean gettingDigitB = false;
+        Boolean gettingDigitF = false;
+
+        for (int i =0; i < matrice.length; i++){
+            for (int j = 0; j < matrice[i].length; j++){
+                if (!Character.isDigit(matrice[i][j].charAt(0)) && !matrice[i][j].equals(".") && !matrice[i][j].equals("I"))
+                {
+                    // GEAR SPOTTED
+                    // GATHERING THE DIGIT
+                    for (int g = -1; g < 2; g++){
+                        for (int h = -1; h < 2; h++) {
+                            if (!(g == 0 && h == 0)) {
+                                try {
+                                    notCheckedEverything = true;
+                                    gettingDigitB = false;
+                                    gettingDigitF = false;
+                                    if(Character.isDigit(matrice[i + g][j + h].charAt(0))){
+                                        while (notCheckedEverything){
+                                            while(gettingDigitB){
+
+                                            }
+                                            while(gettingDigitF){
+
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        System.out.println("----------------");
+        return matrice;
     }
 
     public void matriceReader(String[][] matrice){
-        for (int i =0; i < matrice.length; i++){
+        for (int i = 0; i< matrice.length; i++){
             for (int j = 0; j < matrice[i].length; j++){
                 System.out.print(matrice[i][j]);
             }
