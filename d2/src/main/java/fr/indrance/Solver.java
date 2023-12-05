@@ -14,15 +14,15 @@ public class Solver {
         int gameID = -1;
 
         int maxRed = 12;
-        int maxBlue = 13;
-        int maxGreen = 14;
+        int maxBlue = 14;
+        int maxGreen = 13;
 
         int currentRed = 0;
         int currentBlue = 0;
         int currentGreen = 0;
 
         String file = getClass().getClassLoader().getResource("d2.txt").getFile();
-        System.out.println(file);
+
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String currentLine = reader.readLine();
         while (currentLine != null) {
