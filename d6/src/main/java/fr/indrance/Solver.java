@@ -6,8 +6,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class Solver {
+
+
+    public static class locks{
+
+        int nbThread = 5;
+
+        public synchronized void removeThread(){
+            nbThread--;
+        }
+
+    }
 
     public class Boat {
 
@@ -36,37 +48,101 @@ public class Solver {
     }
 
     public class Race {
-
+        Logger logger = Logger.getLogger("race");
         int raceID = 0;
-        int totalTime = 0;
-        int record = 0;
+        long totalTime = 0;
+        long record = 0;
         ArrayList<Boat> allBoat = new ArrayList<>();
         ArrayList<Boat> recordBeater = new ArrayList<>();
 
-        public Race(int ri, int t, int r) {
+        locks lock = new locks();
+
+        public Race(int ri, long t, long r) {
             raceID = ri;
             totalTime = t;
             record = r;
         }
 
         public void init() {
+            System.out.println("Starting init");
             for (int i = 0; i <= totalTime; i++) {
                 allBoat.add(new Boat(i));
             }
+            System.out.println("init finished");
         }
 
         public void run() {
             for (int i = 0; i < totalTime; i++){
+
                 for(Boat b : allBoat){
                     b.runOneStep();
                 }
+                logger.info(i+"/"+totalTime);
+               // System.out.println(i+"/"+totalTime);
             }
             for (Boat b : allBoat){
                 if (b.getDistance() > record){
                     recordBeater.add(b);
                 }
             }
-            System.out.println("Race 1 :" + raceID + " Winner : " + recordBeater.size());
+            //System.out.println("Race 1 :" + raceID + " Winner : " + recordBeater.size());
+        }
+
+        public void threadedRun(){
+            long start = 1;
+            long part = totalTime/9;
+            Thread newThread1 = new Thread(() -> {
+                for (int i = (int) start; i < part; i++){
+                    for(int y = (int) start; y < part; y++){
+                        allBoat.get(i).runOneStep();
+                    }
+                    logger.info(i + "/" + part);
+                }
+                lock.removeThread();
+            });
+            Thread newThread2 = new Thread(() -> {
+                for (int i = (int) part; i < part*2; i++){
+                    for(int y = (int) part; y < part*2; y++){
+                        allBoat.get(i).runOneStep();
+                    }
+                    logger.info(i + "/" + part);
+                }
+                lock.removeThread();
+            });
+            Thread newThread3 = new Thread(() -> {
+                for (int i = (int) part*2; i < part*3; i++){
+                    for(int y = (int) part*2; y < part*3; y++){
+                        allBoat.get(i).runOneStep();
+                    }
+                    logger.info(i + "/" + part);
+                }
+                lock.removeThread();
+            });
+            Thread newThread4 = new Thread(() -> {
+                for (int i = (int) part*3; i < part*4; i++){
+                    for(int y = (int) part*3; y < part*4; y++){
+                        allBoat.get(i).runOneStep();
+                    }
+                    logger.info(i + "/" + part);
+                }
+                lock.removeThread();
+            });
+            Thread newThread5 = new Thread(() -> {
+                for (int i = (int) part*4; i < part*5; i++){
+                    for(int y = (int) part*4; y < part*5; y++){
+                        allBoat.get(i).runOneStep();
+                    }
+                    logger.info(i + "/" + part);
+                }
+                lock.removeThread();
+            });
+            newThread1.start();
+            newThread2.start();
+            newThread3.start();
+            newThread4.start();
+            newThread5.start();
+
+
         }
 
         public int report() {
@@ -75,13 +151,13 @@ public class Solver {
 
     }
 
-    int nbRace = 4;
-    int finalResult = 1;
-    public void Solve() throws IOException {
-
-
-        String file = getClass().getClassLoader().getResource("d4.txt").getFile();
+    int nbRace = 1;
+    Long finalResult = 1L;
+    public void Solve() throws IOException, InterruptedException {
+        String file = getClass().getClassLoader().getResource("example.txt").getFile();
         System.out.println(file);
+        long start = System.currentTimeMillis();
+        System.out.println(start);
         BufferedReader reader = new BufferedReader(new FileReader(file));
         // Get the race time
         String currentLine = reader.readLine();
@@ -91,12 +167,19 @@ public class Solver {
         String[] distance = currentLine.split(" ");
         reader.close();
         for (int i = 0; i < nbRace; i++) {
-            Race race = new Race(i, Integer.parseInt(time[i]), Integer.parseInt(distance[i]));
+            Race race = new Race(i, Long.parseLong(time[i]), Long.parseLong(distance[i]));
             race.init();
-            race.run();
+            race.threadedRun();
+            locks lock = new locks();
+            while (lock.nbThread != 0){
+                System.out.println("waiting");
+                Thread.sleep(500);
+            }
             finalResult*= race.report();
         }
+        long stop = System.currentTimeMillis();
         System.out.println("Final result = " + finalResult);
+        System.out.println(stop-start);
     }
 
 }
