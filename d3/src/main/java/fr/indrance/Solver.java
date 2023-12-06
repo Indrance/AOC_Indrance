@@ -40,16 +40,20 @@ public class Solver {
 
     public String[][] matriceSolver(String[][] matrice){
         Boolean notCheckedEverything = true;
-        Boolean gettingDigitB = false;
-        Boolean gettingDigitF = false;
+        boolean gettingDigitB = false;
+        boolean gettingDigitF = false;
+        boolean isDigit = false;
+        int finalResult = 0;
+        String tmpResult = "";
 
         for (int i =0; i < matrice.length; i++){
             for (int j = 0; j < matrice[i].length; j++){
                 if (!Character.isDigit(matrice[i][j].charAt(0)) && !matrice[i][j].equals(".") && !matrice[i][j].equals("I"))
                 {
+                    tmpResult = "";
                     // GEAR SPOTTED
                     // GATHERING THE DIGIT
-                    for (int g = -1; g < 2; g++){
+                   /* for (int g = -1; g < 2; g++){
                         for (int h = -1; h < 2; h++) {
                             if (!(g == 0 && h == 0)) {
                                 try {
@@ -59,7 +63,11 @@ public class Solver {
                                     if(Character.isDigit(matrice[i + g][j + h].charAt(0))){
                                         while (notCheckedEverything){
                                             while(gettingDigitB){
+                                                try{
 
+                                                } catch (Exception e){
+
+                                                }
                                             }
                                             while(gettingDigitF){
 
@@ -70,8 +78,53 @@ public class Solver {
                                 }
                             }
                         }
-                    }
+                    }*/
+                    gettingDigitB = true;
+                    gettingDigitF = true;
+                    int x = 0;
+                    int y = 0;
 
+                    isDigit = false;
+                    // Going North
+                    x=0;
+                    y = -1;
+                    try {
+                        if (Character.isDigit(matrice[i+y][j].charAt(0)))
+                        {
+                            tmpResult = matrice[i+y][j];
+                            isDigit = true;
+                        }
+                        // going left
+                        try {
+                            while (gettingDigitB){
+                                x--;
+                                if (Character.isDigit(matrice[i+y][j].charAt(0))){
+                                    if (isDigit){
+
+                                    } else {
+                                        tmpResult = matrice[i+y][j]+tmpResult;
+                                    }
+                                } else {
+                                    gettingDigitB = false;
+                                }
+                            }
+
+                        } catch (Exception ignored){}
+                        x = 0;
+                        // going right
+                        try {
+                            while (gettingDigitF){
+                                x++;
+                                if (Character.isDigit(matrice[i+y][j].charAt(0))){
+                                    tmpResult = tmpResult+matrice[i+y][j];
+                                } else {
+                                    gettingDigitF = false;
+                                }
+                            }
+                        } catch (Exception ignored){}
+                        x = 0;
+                    } catch (Exception ignored){}
+                    System.out.println(finalResult);
                 }
             }
         }
