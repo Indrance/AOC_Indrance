@@ -4,8 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Solver {
@@ -15,8 +14,13 @@ public class Solver {
 
         int nbThread = 5;
 
+        List<Boat> boats = new ArrayList<>();
+
         public synchronized void removeThread(){
             nbThread--;
+        }
+        public synchronized void addBoat(Boat b){
+            boats.add(b);
         }
 
     }
@@ -25,14 +29,21 @@ public class Solver {
 
         int charge = -1;
         int speed = 0;
-        int distance = 0;
+        long distance = 0;
 
-        public Boat(int c) {
+        long trueTotalTime = -1;
+        public Boat(int c, long time) {
+
             charge = c;
+            trueTotalTime = time-c;
         }
 
+        public void runOnce(){
+            speed = charge;
+            distance = speed*trueTotalTime;
+        }
         // calculate the distance
-        public void runOneStep() {
+        public synchronized void runOneStep() {
             if (charge > 0){
                 speed++;
                 charge--;
@@ -41,7 +52,7 @@ public class Solver {
             }
         }
 
-        public int getDistance() {
+        public long getDistance() {
             return distance;
         }
 
@@ -66,12 +77,12 @@ public class Solver {
         public void init() {
             System.out.println("Starting init");
             for (int i = 0; i <= totalTime; i++) {
-                allBoat.add(new Boat(i));
+                allBoat.add(new Boat(i,totalTime));
             }
             System.out.println("init finished");
         }
 
-        public void run() {
+        public void runOneStep() {
             for (int i = 0; i < totalTime; i++){
 
                 for(Boat b : allBoat){
@@ -87,8 +98,22 @@ public class Solver {
             }
             //System.out.println("Race 1 :" + raceID + " Winner : " + recordBeater.size());
         }
+        public void runOnce() {
+            for (int i = 0; i < totalTime; i++){
+                    allBoat.get(i).runOnce();
+                logger.info(i+"/"+totalTime);
+                // System.out.println(i+"/"+totalTime);
+            }
+            for (Boat b : allBoat){
+                if (b.getDistance() > record){
+                    recordBeater.add(b);
+                }
+            }
+            //System.out.println("Race 1 :" + raceID + " Winner : " + recordBeater.size());
+        }
 
-        public void threadedRun(){
+
+        public void threadedRun() throws InterruptedException {
             long start = 1;
             long part = totalTime/9;
             Thread newThread1 = new Thread(() -> {
@@ -105,7 +130,7 @@ public class Solver {
                     for(int y = (int) part; y < part*2; y++){
                         allBoat.get(i).runOneStep();
                     }
-                    logger.info(i + "/" + part);
+                    logger.info(i + "/" + part*2);
                 }
                 lock.removeThread();
             });
@@ -114,7 +139,7 @@ public class Solver {
                     for(int y = (int) part*2; y < part*3; y++){
                         allBoat.get(i).runOneStep();
                     }
-                    logger.info(i + "/" + part);
+                    logger.info(i + "/" + part*3);
                 }
                 lock.removeThread();
             });
@@ -123,7 +148,7 @@ public class Solver {
                     for(int y = (int) part*3; y < part*4; y++){
                         allBoat.get(i).runOneStep();
                     }
-                    logger.info(i + "/" + part);
+                    logger.info(i + "/" + part*4);
                 }
                 lock.removeThread();
             });
@@ -132,7 +157,7 @@ public class Solver {
                     for(int y = (int) part*4; y < part*5; y++){
                         allBoat.get(i).runOneStep();
                     }
-                    logger.info(i + "/" + part);
+                    logger.info(i + "/" + part*5);
                 }
                 lock.removeThread();
             });
@@ -142,8 +167,19 @@ public class Solver {
             newThread4.start();
             newThread5.start();
 
-
+            while (lock.nbThread != 0){
+                System.out.println("waiting");
+                Thread.sleep(500);
+            }
+            for (Boat b : allBoat){
+                if (b.getDistance() > record){
+                    recordBeater.add(b);
+                }
+            }
+            System.out.println(report());
         }
+
+
 
         public int report() {
             return recordBeater.size();
@@ -154,7 +190,7 @@ public class Solver {
     int nbRace = 1;
     Long finalResult = 1L;
     public void Solve() throws IOException, InterruptedException {
-        String file = getClass().getClassLoader().getResource("example.txt").getFile();
+        String file = getClass().getClassLoader().getResource("d42.txt").getFile();
         System.out.println(file);
         long start = System.currentTimeMillis();
         System.out.println(start);
@@ -169,12 +205,7 @@ public class Solver {
         for (int i = 0; i < nbRace; i++) {
             Race race = new Race(i, Long.parseLong(time[i]), Long.parseLong(distance[i]));
             race.init();
-            race.threadedRun();
-            locks lock = new locks();
-            while (lock.nbThread != 0){
-                System.out.println("waiting");
-                Thread.sleep(500);
-            }
+            race.runOnce();
             finalResult*= race.report();
         }
         long stop = System.currentTimeMillis();
