@@ -10,21 +10,6 @@ import java.util.logging.Logger;
 public class Solver {
 
 
-    public static class locks{
-
-        int nbThread = 5;
-
-        List<Boat> boats = new ArrayList<>();
-
-        public synchronized void removeThread(){
-            nbThread--;
-        }
-        public synchronized void addBoat(Boat b){
-            boats.add(b);
-        }
-
-    }
-
     public class Boat {
 
         int charge = -1;
@@ -66,7 +51,6 @@ public class Solver {
         ArrayList<Boat> allBoat = new ArrayList<>();
         ArrayList<Boat> recordBeater = new ArrayList<>();
 
-        locks lock = new locks();
 
         public Race(int ri, long t, long r) {
             raceID = ri;
@@ -111,74 +95,6 @@ public class Solver {
             }
             //System.out.println("Race 1 :" + raceID + " Winner : " + recordBeater.size());
         }
-
-
-        public void threadedRun() throws InterruptedException {
-            long start = 1;
-            long part = totalTime/9;
-            Thread newThread1 = new Thread(() -> {
-                for (int i = (int) start; i < part; i++){
-                    for(int y = (int) start; y < part; y++){
-                        allBoat.get(i).runOneStep();
-                    }
-                    logger.info(i + "/" + part);
-                }
-                lock.removeThread();
-            });
-            Thread newThread2 = new Thread(() -> {
-                for (int i = (int) part; i < part*2; i++){
-                    for(int y = (int) part; y < part*2; y++){
-                        allBoat.get(i).runOneStep();
-                    }
-                    logger.info(i + "/" + part*2);
-                }
-                lock.removeThread();
-            });
-            Thread newThread3 = new Thread(() -> {
-                for (int i = (int) part*2; i < part*3; i++){
-                    for(int y = (int) part*2; y < part*3; y++){
-                        allBoat.get(i).runOneStep();
-                    }
-                    logger.info(i + "/" + part*3);
-                }
-                lock.removeThread();
-            });
-            Thread newThread4 = new Thread(() -> {
-                for (int i = (int) part*3; i < part*4; i++){
-                    for(int y = (int) part*3; y < part*4; y++){
-                        allBoat.get(i).runOneStep();
-                    }
-                    logger.info(i + "/" + part*4);
-                }
-                lock.removeThread();
-            });
-            Thread newThread5 = new Thread(() -> {
-                for (int i = (int) part*4; i < part*5; i++){
-                    for(int y = (int) part*4; y < part*5; y++){
-                        allBoat.get(i).runOneStep();
-                    }
-                    logger.info(i + "/" + part*5);
-                }
-                lock.removeThread();
-            });
-            newThread1.start();
-            newThread2.start();
-            newThread3.start();
-            newThread4.start();
-            newThread5.start();
-
-            while (lock.nbThread != 0){
-                System.out.println("waiting");
-                Thread.sleep(500);
-            }
-            for (Boat b : allBoat){
-                if (b.getDistance() > record){
-                    recordBeater.add(b);
-                }
-            }
-            System.out.println(report());
-        }
-
 
 
         public int report() {
